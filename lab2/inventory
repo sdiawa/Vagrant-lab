@@ -1,0 +1,20 @@
+# Application serveurs
+[app]
+192.168.60.4
+192.168.60.5
+
+#Database serveur  
+[db]
+192.168.60.6
+
+# tout les serveurs
+
+[multi:children]
+app
+db
+
+# Variable pour tout les serveurs
+
+[multi:vars]
+ansible_ssh_user=vagrant
+ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key
