@@ -1,0 +1,255 @@
+---
+#creer dossier pour backup tech
+- name: create backup directory
+  file:
+    path: /save/elastic_tech
+    state: directory
+  become: true
+  become_user: root
+  tags: archive
+
+# backup derniere version
+
+- name: Archive old tech version
+  archive: 
+    path: /tech/elestic
+    dest: "/save/elastic_tech/elastic_{{ ansible_date_time.iso8601}}.zip"
+    format: zip
+  ignore_errors: yes
+  become: true
+  become_user: root
+  tags: archive
+
+#creer dossier pour backup app
+- name: create backup directory
+  file:
+    path: /save/elastic_app
+    state: directory
+  become: true
+  become_user: root
+  tags: archive
+
+# backup derniere version
+
+- name: Archive old tech version
+  archive: 
+    path: /app/elestic
+    dest: "/save/elastic_app/elastic_{{ ansible_date_time.iso8601}}.zip"
+    format: zip
+  ignore_errors: yes
+  become: true
+  become_user: root
+  tags: archive
+
+######################################################################################
+##########"######################## UTILISATEUR ######################################
+###################################################################################"#"
+
+- name: create elastic user group
+  group:
+    name: elastic
+    gid: 501000
+  become: true
+  become_user: root
+  tags: permission
+
+
+
+######################################################################################
+##########"######################## Docker      ######################################
+###################################################################################"#"
+
+- name: create a network 
+  docker_network:
+    name: elastic
+    driver_options:
+      com.docker.network.bridge.name: elastic
+  become: true
+  become_user: root
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tags: docker
+
+#creer un dossier pour elasic
+- name: create /home/vagrant/tech/elastic
+  file:
+    path: /home/vagrant/tech/elastic
+    state: directory
+  become: true
+  become_user: vagrant
+  tags: docker
+
+- name: copy docker-compose.yml
+  template:
+    src: "docker-compose.yml.j2"
+    dest: "/home/vagrant/tech/elastic/docker-compose.yml"
+    mode : "0660"
+  become: true
+  become_user: vagrant
+  tags: docker  
+
+######################################################################################
+##########"######################## elastic      ######################################
+###################################################################################"#"
+
+- name: Create /home/vagrant/app/elastic/elastic
+  file:
+    path: "/home/vagrant/app/elastic/elastic"
+    state: directory
+    owner: vagrant
+    group: vagrant
+  become: true
+  become_user: vagrant
+  tags: elastic
+
+#- name: copy log4j2.propreties
+#  copy:
+#    src: log4j2.propreties
+#    dest: "/home/vagrant/app/elastic/elastic/log4j2.propreties"
+#    owner: vagrant
+#    group: vagrant
+#    mode : "0770"
+#  become: true
+#  become_user: vagrant
+#  tags: elastic  
+
+- name: Create elastic data directory
+  file:
+    path: "/home/vagrant/app/elastic/data"
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: "0770"
+  become: true
+  become_user: vagrant
+  tags: elastic
+
+- name: Create elastic config  directory
+  file:
+    path: "/home/vagrant/app/elastic/config"
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: "0770"
+  become: true
+  become_user: vagrant
+  tags: elastic
+
+- name: copy elasticsearch.yml
+  template:
+    src: "elasticsearch.yml.j2"
+    dest: "/home/vagrant/app/elastic/config/elasticsearch.yml"
+    mode : "0660"
+  become: true
+  become_user: vagrant
+  tags: elastic  
+
+- name: Create elastic log directory
+  file:
+    path: "/home/vagrant/logs/elastic/"
+    state: directory
+    owner: vagrant
+    group: vagrant
+  become: true
+  become_user: vagrant
+  tags: elastic
+
+- name: Create elastic snapshot directory
+  file:
+    path: "/save/{{ item }}"
+    state: directory
+    owner: vagrant
+    group: vagrant
+  with_items:
+    - elastic
+  become: true
+  become_user: root
+  tags: elastic
+
+######################################################################################
+##########"########################  KIBANA   ######################################
+###################################################################################"#"
+
+- name: Create kibana  directory
+  file:
+    path: "/home/vagrant/app/elastic/kibana"
+    state: directory
+    owner: vagrant
+    group: vagrant
+  become: true
+  become_user: vagrant
+  # when: inventory_hostname in groups['kibana']
+  tags: kibana
+
+
+- name: Create kibana log directory
+  file:
+    path: "/home/vagrant/logs/kibana/"
+    state: directory
+    owner: vagrant
+    group: vagrant
+  become: true
+  become_user: vagrant
+  # when: inventory_hostname in groups['kibana']
+  tags: kibana
+
+#- name: copy kibana.yml
+#  template:
+#    src: "kibana.yml.j2"
+#    dest: "/home/vagrant/app/elastic/kibana/kibana.yml"
+#    owner: vagrant
+#    mode : "0640"
+#  become: true
+#  become_user: vagrant
+#  when: inventory_hostname in groups['kibana']
+#  notify: restart kibana
+#  tags: docker 
+
+######################################################################################
+##########"########################  Permission   ######################################
+###################################################################################"#"
+
+- name: premission directories are 0775
+  command: find /home/vagrant/app/elastic/ /home/vagrant/tech/elastic -type d -exec chmod -c 0775 {} \;
+  become: true
+  become_user: vagrant
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+  tags: permission 
+
+- name: premission directories are 0775
+  command: find /home/vagrant/logs/elastic/ -type d -exec chmod -c 0775 {} \;
+  become: true
+  become_user: vagrant
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+  # when: inventory_hostname in groups['elastic']
+  tags: permission 
+
+- name: premission directories are 0775
+  command: find /home/vagrant/logs/kibana -type d -exec chmod -c 0775 {} \;
+  become: true
+  become_user: vagrant
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+  # when: inventory_hostname in groups['kibana']
+  tags: permission 
+
+
+######################################################################################
+##########"########################  lunch docker-compose#############################
+###################################################################################"#"
+
+- name: lauch elastic
+  command: docker-compose -f /home/vagrant/tech/elastic/docker-compose.yml up -d # --build elastic
+  become: true
+  become_user: vagrant
+  # when: inventory_hostname in groups['elastic']
+  tags: docker,compose 
+
+#- name: lauch kibana
+#  command: docker-compose -f /home/vagrant/tech/elastic/docker-compose.yml up -d --build kibana
+#  become: true
+#  become_user: vagrant
+#  when: inventory_hostname in groups['kibana']
+#  tags: docker,compose 

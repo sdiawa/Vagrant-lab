@@ -1,0 +1,6 @@
+- name: "install elastic"
+  hosts: elk
+  become: yes
+  roles:
+ #- monroles
+  - deploy_elk  
