@@ -1,0 +1,6 @@
+- name: "patch system"
+  hosts: elk
+  become: yes
+  roles:
+ #- monroles
+  - mon_patch  
