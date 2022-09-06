@@ -1,0 +1,29 @@
+# Application thehive
+[thehive]
+192.168.56.8
+192.168.56.9
+
+#Application elk   
+[elk]
+192.168.56.10
+192.168.56.11
+192.168.56.12
+
+
+# Application cortex
+[cortex]
+192.168.56.10
+192.168.56.11
+192.168.56.12
+
+
+# Application cassandra
+[cassandra]
+192.168.56.13
+192.168.56.14
+192.168.56.15
+
+# variable
+[multi:vars]
+ansible_ssh_user=vagrant
+ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key

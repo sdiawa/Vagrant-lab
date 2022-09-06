@@ -1,0 +1,93 @@
+c'est quoi Devops:
+
+
+
+ocherstrateur : est ansible (la gestion de idempotance)
+ordonnanceur de taches: jenkins
+depots en tout genre: git
+testing: postman, junit, JMeter
+notions de databases:
+monitoring: zabbix, promethus
+virtualisation: docker, 
+protocoles web
+
+------------------------------>Pipeline-------------------------------
+CICD:
+Continuous Integration: build/test/merge - construction du livrable applicatif
+Continuous Delivery: pousse l'applicatif dans son depot, dans un etat deployable.
+
+Continuous Deployement: deploiement (installation) de l'applicatif jusqu'en production
+
+--------------------------------------outils--------------------------------
+scheduler: jenkins
+orchestrateur: ansible
+depots: gitlab
+livrable: image docker 
+gestionnaire projet : maven
+
+
+----------------------------------------pour se connecte à la machine ------------------------
+vagrant ssh le nom de la machine
+
+
+
+Error:
+Registry: 
+/home/vagrant# docker run --entrypoint htpasswd registry:2 -Bbn dsk dsk > passwd/htpasswd
+docker: Error response from daemon: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: exec: "htpasswd": executable file not found in $PATH: unknown.
+
+solution : penser a modifier la version de registry:2  -> registry:2.7.0
+
+Error reading config file (/etc/ansible/ansible.cfg): While reading from :
+
+
+
+Error Ansible :
+SH password: 
+192.168.56.26 | FAILED! => {
+    "msg": "Using a SSH password instead of a key is not possible because Host Key checking is enabled and sshpass does not support this.  Please add this host's fingerprint to your known_hosts file to manage this host."
+}
+
+Solution 
+vi /etc/ansible/ansible.cfg
+
+[defaults]
+host_key_checking = false
+
+
+Erreur:
+
+ansible -i inventaire.ini -m authorized_key -a 'user=user_ansible state=present key="{{ lookup("file", "/home/user-ansible/.ssh/id_ecdsa.pub") }}"' --user user-ansible --ask-pass --become --ask-become-pass all
+SSH password:
+BECOME password[defaults to SSH password]:
+bdd1 | UNREACHABLE! => {
+    "changed": false,
+    "msg": "Invalid/incorrect password: Permission denied, please try again.",
+    "unreachable": true
+}
+http1 | UNREACHABLE! => {
+    "changed": false,
+    "msg": "Invalid/incorrect password: Permission denied, please try again.",
+    "unreachable": true
+}
+
+solution:
+generer keypair:
+                ssh-keygen -t rsa
+
+copier sur la machine distante:
+                                ssh-copy-id vagrant@192.168.56.25
+
+
+install python3
+sudo yum install python3-pip -y
+
+
+An exception occurred during task execution. To see the full traceback, use -vvv. The error was: ModuleNotFoundError: No module named 'requests'
+fatal: [192.168.56.35]: FAILED! => {"changed": false, "msg": "Failed to import the required Python library (Docker SDK for Python: docker above 5.0.0 (Python >= 3.6) or docker before 5.0.0 (Python 2.7) or docker-py (Python 2.6)) on srv-elk1's Python /usr/bin/python3. Please read the module documentation and install it in the appropriate location. If the required library is installed, but Ansible is using the wrong Python interpreter, please consult the documentation on ansible_python_interpreter, for example via `pip install docker` (Python >= 3.6) or `pip install docker==4.4.4` (Python 2.7) or `pip install docker-py` (Python 2.6). The error was: No module named 'requests'"}
+
+solution : pip install docker
+
+
+https://www.youtube.com/watch?v=7al0yehXa_g
+https://www.youtube.com/watch?v=sGXTfsz-3-4

@@ -1,0 +1,104 @@
+# ---
+# - hosts: 192.168.56.10
+#  become: yes
+
+- name: Repo docker centos
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+  becoome: true
+  become_user: root
+- name: install python3
+  yum :
+    name: python3
+    state: present
+    become: true
+    become_user: root
+  
+-  name: Install libselinux-python3.x86_64
+  yum:
+    name: libselinux-python3.x86_64
+    state: present
+  become: true
+  become_user: root
+
+- name: Install libselinux-python3.x86_64
+  yum:
+    name: libselinux-python3.x86_64
+    state: present
+  become: true
+  become_user: root
+
+- name: Install docker
+  yum:
+    name: docker-ce
+    state: present
+  become: true
+  become_user: root
+
+- name: Stop docker deamon
+  service:
+    name: docker
+    state: stopped
+  become: true
+  become_user: root
+  
+- name: running docker deamon
+  service:
+    name: docker
+    state: started
+    daemon_reload: yes
+    enabled: yes
+  become: true
+  become_user: root
+
+- name: update on  docker.sock
+  command: chmod o+rw /var/run/docker.sock
+  service:
+    name: docker
+    state: stopped
+  become: true
+  become_user: root
+
+- name: Restarting docker deamon
+  service:
+    name: docker
+    state: restarted
+  become: true
+  become_user: root
+
+- mame: Update right on docker-compose
+  file:
+    path: /usr/local/bin/docker-compose
+    state: touch
+    mode: u+x, g+x, o+x
+  become: true
+  become_user: root
+
+- name: Install docker
+  pip:
+    name: docker
+    executable: pip3
+  become: true
+  become_user: root
+
+- name: Install docker-compose
+  pip:
+    name: docker-compose
+    executable: pip3
+  become: true
+  become_user: root
+
+# - name: Add logrotate file
+  # copy:
+  #  src: logrotate
+  #  dest: /etc/logrotate.d/docker
+  # become: true
+  # become user: root
+
+  tasks:
+    - name: Install Apache.
+      yum:
+        name:
+          - docker 
+

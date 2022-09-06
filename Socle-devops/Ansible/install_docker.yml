@@ -1,0 +1,25 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: installa dipendenze
+      yum:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+- name: assicurati che docker sia attivo
+      service:
+        name: docker
+        state: started
+        enabled: yes
+handlers:
+    - name: restart docker
+      service: 
+        name: docker 
+        state: restarted

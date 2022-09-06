@@ -1,0 +1,22 @@
+---
+- hosts: 192.168.56.8
+  become: yes
+
+  tasks:
+    - name: installation de basic
+      yum:
+      #update_cache: yes
+        name: 
+          - git
+          - vim
+          - python-pip
+          - unzip"{{ packages }}"
+        
+  
+  become: true
+  become_user: root
+  tasks:
+    - name: config http.sslVerify false
+      command: git config --global http.sslVerify false
+      become: true
+      become_user: root

@@ -1,0 +1,136 @@
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ # serveur jenkinsssssss
+Vagrant.configure("2") do |config|
+  config.vm.define "jenkins-pipeline" do |jenkins|
+    jenkins.vm.box = "debian/buster64"
+    jenkins.vm.network "private_network", type: "dhcp"
+    jenkins.vm.hostname = "jenkins-pipeline"
+    jenkins.vm.provider "virtualbox" do |v|
+      v.name = "jenkins-pipeline"
+      v.memory = 2048
+      v.cpus = 2
+    end
+    
+    config.vm.provision "shell", inline: <<-SHELL
+    sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config    
+    service ssh restart
+  SHELL
+  #jenkins.vm.provision "shell", path: "install_jenkins.sh"
+end
+
+ # serveur prod
+  config.vm.define "srv-prd" do |srvdprd|
+    srvdprd.vm.box = "debian/buster64"
+    srvdprd.vm.network "private_network", type: "dhcp"
+    srvdprd.vm.hostname = "srv-prd"
+    srvdprd.vm.provider "virtualbox" do |v|
+      v.name = "srv-prd"
+      v.memory = 512
+      v.cpus = 1
+    end
+    
+    config.vm.provision "shell", inline: <<-SHELL
+    sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config    
+    service ssh restart
+  SHELL
+
+end
+
+ # serveur dev
+config.vm.define "srv-dev" do |srvdev|
+  srvdev.vm.box = "debian/buster64"
+  srvdev.vm.network "private_network", type: "dhcp"
+  srvdev.vm.hostname = "srv-dev"
+  srvdev.vm.provider "virtualbox" do |v|
+    v.name = "srv-dev"
+    v.memory = 512
+    v.cpus = 1
+  end
+  
+  config.vm.provision "shell", inline: <<-SHELL
+  sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config    
+  service ssh restart
+SHELL
+
+end
+
+
+ # serveur stage/recette
+config.vm.define "srv-stage" do |srvstage|
+  srvstage.vm.box = "debian/buster64"
+  srvstage.vm.network "private_network", type: "dhcp"
+  srvstage.vm.hostname = "srv-stage"
+  srvstage.vm.provider "virtualbox" do |v|
+    v.name = "srv-stage"
+    v.memory = 512
+    v.cpus = 1
+  end
+  
+  config.vm.provision "shell", inline: <<-SHELL
+  sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config    
+  service ssh restart
+SHELL
+
+end
+
+# Serveur bdd 
+config.vm.define "srvbdd-pipeline" do |srvbdd|
+  srvbdd.vm.box = "debian/buster64"
+  srvbdd.vm.network "private_network", type: "dhcp"
+  srvbdd.vm.hostname = "srvbdd-pipeline"
+  srvbdd.vm.provider "virtualbox" do |v|
+    v.name = "srvbdd-pipeline"
+    v.memory = 512
+    v.cpus = 1
+  end
+  
+  config.vm.provision "shell", inline: <<-SHELL
+  sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config    
+  service ssh restart
+SHELL
+srvbdd.vm.provision "shell", path: "install_srvpostgres.sh"
+end
+
+# Serveur registry
+config.vm.define "registry-pipeline" do |registry|
+  
+  registry.vm.box = "debian/buster64"
+  registry.vm.network "private_network", type: "dhcp"
+  registry.vm.hostname = "registry-pipeline"
+  registry.vm.boot_timeout = 600
+  registry.vm.provider "virtualbox" do |v|
+    v.name = "registry-pipeline"
+    v.memory = 512
+    v.cpus = 1
+   
+  end
+  
+  config.vm.provision "shell", inline: <<-SHELL
+   sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config    
+   service ssh restart
+SHELL
+registry.vm.provision "shell", path: "install_registry.sh"
+end
+
+  # Serveur gitlab
+config.vm.define "gitlab-pipeline" do |gitlab|
+  
+  gitlab.vm.box = "debian/buster64"
+  gitlab.vm.network "private_network", type: "dhcp"
+  gitlab.vm.hostname = "gitlab-pipeline"
+  gitlab.vm.provider "virtualbox" do |v|
+    v.name = "gitlab-pipeline"
+    v.memory = 3072
+    v.cpus = 2
+  end
+  
+  config.vm.provision "shell", inline: <<-SHELL
+  sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config    
+  service ssh restart
+SHELL
+gitlab.vm.provision "shell", path: "install_gitlab.sh"
+end
+end

@@ -1,0 +1,9 @@
+/appli/docker/500000.500000/containers//.1og {
+rotate 1
+daily
+compress
+size=1M
+missingok
+delaycompress
+copytruncate
+}

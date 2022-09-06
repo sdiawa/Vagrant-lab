@@ -1,0 +1,6 @@
+- name: "install_docker and compose"
+  hosts: docker
+  become: yes
+  roles:
+ #- monroles
+  - install_docker  

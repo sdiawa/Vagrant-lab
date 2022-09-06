@@ -1,0 +1,6 @@
+- name: test
+  hosts: dev
+  become: yes
+  roles:
+ #- monroles
+  - docker  
