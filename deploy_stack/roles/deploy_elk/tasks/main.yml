@@ -1,4 +1,20 @@
 ---
+
+
+######################################################################################
+##########"######################## install python 3 and pip docker ###################
+###################################################################################"#"
+
+- name: Install python 3 and pip docker 
+  yum:
+    name:
+      - python3-pip
+    
+
+- name: Install Pip docker 
+  command: pip3 install docker
+    
+
 #creer dossier pour backup tech
 - name: create backup directory
   file:
@@ -142,7 +158,16 @@
     mode : "0660"
   become: true
   become_user: vagrant
-  tags: elastic  
+  tags: elastic 
+
+- name: copy kibana.yml
+  template:
+    src: "kibana.yml.j2"
+    dest: "/home/vagrant/app/kibana/config/kibana.yml"
+    mode : "0660"
+  become: true
+  become_user: vagrant
+  tags: elastic
 
 - name: Create elastic log directory
   file:

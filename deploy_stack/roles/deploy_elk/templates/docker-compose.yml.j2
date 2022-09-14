@@ -1,19 +1,40 @@
-version: "3.0"
+version: "2.3"
 services:
   elasticsearch:
     container_name: elk-container
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
     restart: always
     environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPS=-Xms4g -Xmx4g -Des.http.cname_in_publish_address=true"
       - xpack.security.enabled=false
-      - "discovery.type=single-node"
+      #- "discovery.type=single-node"
+      - node.name=node-one
+      - node.data=true
+      - node.master=true
+      - network.publish_host=192.168.56.35
+      - http.port=9200
+      - transport.tcp.port=9300
+      - discovery.zen.minimum_master_nodes=2
+      - cluster.name=dsk-cluster
+      - thread_pool.search.queue_size=100000
+      - thread_pool.write.queue_size=100000
+      - path.repo=/usr/share/elasticsearch/repo
+      - path.repo=/usr/share/elasticsearch/data
+      - cluster.initial_master_nodes=192.168.56.35,192.168.56.34
+      - discovery.seed_hosts=192.168.56.35,
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
     volumes:
       - /home/vagrant/app/elastic/data:/usr/share/elasticsearch/data
-      - /home/vagrant/app/logs/elastic:/usr/share/elasticsearch/logs
-      - /home/vagrant/app/elastic/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - /home/vagrant/logs/elastic:/usr/share/elasticsearch/logs
+      #- /home/vagrant/app/elastic/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
     ports:
-      - 9200:9200  
+      - 9200:9200
       - 9300:9300
 
   kibana:
@@ -22,10 +43,9 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elk-container:9200
     volumes:
-      - /home/vagrant/app/logs/kibana:/var/run/log
-      #-/home/vagrant/app/elastic/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - /home/vagrant/logs/kibana:/var/run/log
+      -/home/vagrant/app/elastic/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
     depends_on:
       - elasticsearch
     ports:
       - 5601:5601
-
