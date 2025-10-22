@@ -1,0 +1,144 @@
+===========================
+Cheat Sheet DevOps Quotidien – Version Commentée
+===========================
+
+1️⃣ Linux / CLI de base
+----------------------
+ls -lAh  -> Liste détaillée des fichiers, incluant fichiers cachés, tailles lisibles
+cd /path/to/dir  -> Changer de répertoire
+pwd  -> Afficher le chemin actuel
+mkdir -p newdir  -> Créer un répertoire (avec parents si nécessaire)
+rm -rf dir_or_file  -> Supprimer un fichier ou répertoire de force
+cp -r src dest  -> Copier répertoire ou fichier
+mv src dest  -> Déplacer ou renommer fichier/dossier
+find . -name "pattern"  -> Chercher fichiers selon motif
+du -sh *  -> Taille fichiers/répertoires
+df -h  -> Espace disque disponible
+
+Processus et ressources
+top  -> Monitorer les processus en temps réel
+htop  -> Version améliorée de top (si installé)
+ps aux | grep process  -> Chercher un processus spécifique
+kill <pid>  -> Terminer un processus
+kill -9 <pid>  -> Forcer l’arrêt
+free -h  -> Voir la mémoire disponible
+uptime  -> Charge du système
+
+Réseau
+ping google.com  -> Tester la connectivité réseau
+curl -v http://url  -> Tester endpoint HTTP
+wget http://url  -> Télécharger fichier
+netstat -tulnp  -> Lister ports en écoute et services associés
+ss -tulnp  -> Alternative à netstat
+telnet host port  -> Tester connexion TCP
+
+Utilisateurs / permissions
+whoami  -> Afficher utilisateur actuel
+id  -> Afficher UID, GID et groupes
+sudo su - username  -> Passer à un autre utilisateur
+chmod 755 file  -> Changer permissions
+chown user:group file  -> Changer propriétaire/groupe
+
+Cron / planification
+crontab -e  -> Editer les tâches cron
+crontab -l  -> Lister tâches cron
+systemctl status cron  -> Vérifier service cron
+systemctl restart cron  -> Redémarrer cron
+0 * * * * /home/user/script.sh  -> Exemple job toutes les heures
+
+2️⃣ IBM Cloud CLI / COS
+----------------------
+ibmcloud login -a https://cloud.ibm.com -r <region> -g <resource-group>  -> Connexion à IBM Cloud
+ibmcloud target  -> Vérifier org, space, région
+ibmcloud ks clusters  -> Lister clusters Kubernetes
+ibmcloud ks cluster config --cluster <cluster-name>  -> Configurer kubectl pour le cluster
+
+COS (Cloud Object Storage)
+ibmcloud cos buckets  -> Lister buckets
+ibmcloud cos objects --bucket <bucket-name>  -> Lister objets
+ibmcloud cos object-put --bucket <bucket> --key <key> --file <localfile>  -> Upload fichier
+ibmcloud cos object-get --bucket <bucket> --key <key> --file <localfile>  -> Télécharger fichier
+ibmcloud cos object-delete --bucket <bucket> --key <key>  -> Supprimer objet
+
+3️⃣ Kubernetes CLI (kubectl)
+----------------------------
+kubectl get nodes  -> Lister tous les nœuds
+kubectl get pods -A  -> Lister tous les pods
+kubectl get svc -A  -> Lister tous les services
+kubectl get deployments -A  -> Lister deployments
+kubectl describe pod <pod> -n <namespace>  -> Voir détails pod
+kubectl logs <pod> -n <namespace>  -> Logs pod
+kubectl exec -it <pod> -n <namespace> -- /bin/bash  -> Shell dans pod
+kubectl port-forward <pod> 8080:80  -> Forward port local vers pod
+kubectl apply -f <file.yaml>  -> Appliquer manifeste
+kubectl delete -f <file.yaml>  -> Supprimer objet
+kubectl rollout status deployment/<deployment-name>  -> Status déploiement
+kubectl rollout restart deployment/<deployment-name>  -> Redémarrer déploiement
+kubectl top pods -n <namespace>  -> CPU/RAM pods
+kubectl top nodes  -> CPU/RAM nodes
+
+4️⃣ OpenShift / Red Hat CLI (oc)
+--------------------------------
+oc login <api-server> --token=<token> --namespace=<namespace>  -> Connexion cluster OpenShift
+oc get projects  -> Lister projets
+oc get pods  -> Lister pods
+oc get svc  -> Lister services
+oc apply -f <file.yaml>  -> Appliquer manifeste
+oc delete -f <file.yaml>  -> Supprimer objet
+oc logs <pod-name>  -> Logs pod
+oc rsh <pod-name>  -> Shell dans pod
+
+5️⃣ ArgoCD CLI
+--------------
+argocd login <server> --username <user> --password <pwd>  -> Connexion serveur ArgoCD
+argocd app list  -> Lister applications
+argocd app get <app-name>  -> Détails application
+argocd app sync <app-name>  -> Synchroniser application
+argocd app diff <app-name>  -> Comparer Git vs cluster
+argocd app wait <app-name> --timeout 60  -> Attendre sync
+
+6️⃣ Docker / Containers
+----------------------
+docker ps -a  -> Lister containers
+docker images  -> Lister images
+docker logs <container>  -> Logs container
+docker exec -it <container> /bin/bash  -> Shell container
+docker stop <container>  -> Stop container
+docker rm <container>  -> Supprimer container
+docker rmi <image>  -> Supprimer image
+
+7️⃣ Git / CI-CD
+---------------
+git status  -> Vérifier modifications locales
+git pull origin main  -> Récupérer dernières modifs
+git checkout <branch>  -> Changer de branche
+git merge <branch>  -> Fusionner branches
+git add .  -> Ajouter fichiers pour commit
+git commit -m "message"  -> Commit
+git push origin <branch>  -> Pousser modifications
+
+8️⃣ OpenSSL / KDB / Certificats
+-------------------------------
+openssl genrsa -out key.pem 2048  -> Générer clé privée RSA
+openssl req -new -key key.pem -out request.csr  -> Générer CSR
+openssl x509 -in cert.pem -out cert.der -outform DER  -> Convertir PEM->DER
+openssl x509 -in cert.pem -text -noout  -> Vérifier certificat
+openssl s_client -connect host:443  -> Tester connexion SSL/TLS
+gskcapicmd -keydb -open kdb.kdb -stashed -list  -> Lister KDB
+gskcapicmd -cert -add -db kdb.kdb -label "label" -file cert.arm  -> Ajouter certificat
+gskcapicmd -cert -details -db kdb.kdb -label "label"  -> Vérifier certificat
+
+9️⃣ Surveillance / Debug
+------------------------
+tail -f /var/log/syslog  -> Suivre logs
+journalctl -u <service>  -> Logs service systemd
+watch kubectl get pods -A  -> Rafraîchissement pods
+kubectl describe pod <pod>  -> Details pod
+kubectl logs <pod> -n <namespace>  -> Logs pod
+
+10️⃣ Tips DevOps
+----------------
+- Crée alias bash pour commandes fréquentes
+- Toujours vérifier namespace/cluster avant apply/delete
+- Automatiser backups COS et sync ArgoCD via scripts/crons
+- Utiliser fichier .env pour variables d'environnement (cluster, token...)
