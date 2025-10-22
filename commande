@@ -77,6 +77,47 @@ kubectl rollout restart deployment/<deployment-name>  -> Redémarrer déploiemen
 kubectl top pods -n <namespace>  -> CPU/RAM pods
 kubectl top nodes  -> CPU/RAM nodes
 
+Namespace / contexte :
+kubectl config get-contexts      # Voir contextes Kubernetes
+kubectl config use-context <ctx> # Changer de cluster ou namespace
+kubectl config set-context --current --namespace=<ns>  # Changer namespace par défaut
+
+Debug pods avancé :
+kubectl exec -it <pod> -- netstat -tulnp       # Vérifier ports dans pod
+kubectl exec -it <pod> -- lsof -i             # Vérifier fichiers ouverts
+kubectl logs -f --tail=100 <pod>              # Logs récents et suivi
+
+Persistent Volumes avancés :
+kubectl describe pv <pv>        # Infos PV
+kubectl describe pvc <pvc>      # Infos PVC
+kubectl get sc                  # StorageClass disponibles
+
+
+Kubernetes – Helm / Diagnostics avancés
+Vérifier les releases Helm
+helm list -A                     # Lister toutes les releases Helm dans tous les namespaces
+helm status <release> -n <ns>    # Statut d’une release spécifique
+helm get all <release> -n <ns>   # Détails complets : chart, values, hooks, manifest
+helm get values <release> -n <ns> # Valeurs appliquées pour une release
+
+Installer / mettre à jour une release
+helm install <release> <chart> -n <namespace> --create-namespace  # Installer un chart
+helm upgrade <release> <chart> -n <namespace> --values values.yaml  # Mise à jour avec valeurs personnalisées
+
+Rollback / désinstallation
+helm rollback <release> <revision> -n <namespace>  # Revenir à une version précédente
+helm uninstall <release> -n <namespace>           # Supprimer une release
+
+Vérification et debug
+helm history <release> -n <namespace>        # Historique des releases
+helm diff upgrade <release> <chart> -n <ns>  # Différence entre état actuel et nouveau chart (plugin helm-diff)
+helm test <release> -n <namespace>           # Exécuter les tests définis pour la release
+
+Repository Helm
+helm repo add <name> <url>       # Ajouter un repo
+helm repo update                 # Mettre à jour les charts
+helm search repo <chart>         # Chercher un chart dans les repos
+
 4️⃣ OpenShift / Red Hat CLI (oc)
 --------------------------------
 oc login <api-server> --token=<token> --namespace=<namespace>  -> Connexion cluster OpenShift
@@ -128,6 +169,14 @@ gskcapicmd -keydb -open kdb.kdb -stashed -list  -> Lister KDB
 gskcapicmd -cert -add -db kdb.kdb -label "label" -file cert.arm  -> Ajouter certificat
 gskcapicmd -cert -details -db kdb.kdb -label "label"  -> Vérifier certificat
 
+Vérification certificat :
+openssl verify cert.pem
+openssl x509 -noout -text -in cert.pem
+
+openssl pkcs12 -export -out cert.pfx -inkey key.pem -in cert.pem
+
+
+
 9️⃣ Surveillance / Debug
 ------------------------
 tail -f /var/log/syslog  -> Suivre logs
@@ -142,3 +191,123 @@ kubectl logs <pod> -n <namespace>  -> Logs pod
 - Toujours vérifier namespace/cluster avant apply/delete
 - Automatiser backups COS et sync ArgoCD via scripts/crons
 - Utiliser fichier .env pour variables d'environnement (cluster, token...)
+
+
+Diagnostics serveur Red Hat / Linux
+Commande
+Explication
+top
+Voir l’utilisation CPU/mémoire en temps réel
+htop
+Version améliorée de top (si installée)
+uptime
+Charge moyenne du serveur depuis le démarrage
+free -h
+Mémoire utilisée et disponible
+vmstat 1 5
+Statistiques CPU, mémoire, swap toutes les secondes 5 fois
+iostat -xz 1 5
+Stats d’I/O disque détaillées toutes les secondes
+sar -u 1 5
+Historique et stats CPU avec le paquet sysstat
+df -h
+Usage disque par partition
+du -sh /path/to/dir
+Taille d’un répertoire précis
+lsblk
+Voir les périphériques de stockage et partitions
+mount
+Liste des systèmes de fichiers montés
+ps aux --sort=-%cpu
+Lister les processus les plus consommateurs CPU
+ps aux --sort=-%mem
+Lister les processus les plus consommateurs mémoire
+netstat -tulnp
+Ports en écoute et services associés
+ss -tulnp
+Alternative à netstat
+ping <host>
+Vérifier la connectivité réseau
+traceroute <host>
+Suivre le chemin réseau jusqu’à un hôte
+journalctl -xe
+Logs système récents et erreurs critiques
+tail -f /var/log/messages
+Suivre les logs principaux du système
+systemctl status <service>
+Vérifier état d’un service systemd
+systemctl restart <service>
+Redémarrer un service
+`dmesg
+tail -20`
+uptime && w
+Charge serveur + utilisateurs connectés
+sar -n DEV 1 5
+Stats trafic réseau par interface
+
+df -h                  # Usage disque par partition (lisible)
+df -i                  # Vérifier les inodes utilisés (important si nombreux petits fichiers)
+
+Trouver les gros fichiers / répertoires
+du -sh /path/*          # Taille de chaque sous-répertoire/fichier
+du -ah /path | sort -rh | head -20   # 20 fichiers/répertoires les plus gros
+
+Trouver fichiers volumineux rapidement
+find / -type f -size +500M -exec ls -lh {} \; | awk '{ print $9 ": " $5 }'
+# Liste les fichiers > 500 Mo avec taille
+
+Compression et décompression
+# Compression
+tar -czvf archive.tar.gz /path/to/dir    # Compresser un répertoire
+gzip fichier.txt                         # Compresser un fichier
+bzip2 fichier.txt                        # Compression plus efficace
+zip -r archive.zip /path/to/dir          # Compression zip
+
+# Décompression
+tar -xzvf archive.tar.gz                 # Décompresser tar.gz
+gunzip fichier.txt.gz                     # Décompresser gzip
+bunzip2 fichier.txt.bz2                   # Décompresser bzip2
+unzip archive.zip                         # Décompresser zip
+
+Supprimer les anciens fichiers / logs volumineux
+# Supprimer les fichiers logs plus anciens que 30 jours
+find /var/log -type f -name "*.log" -mtime +30 -exec rm -f {} \;
+
+# Archiver les logs avant suppression
+find /var/log -type f -name "*.log" -mtime +30 -exec tar -rvf old_logs.tar {} \; -exec rm -f {} \;
+
+Surveiller l’utilisation en temps réel
+watch -n 5 'df -h /'           # Rafraîchir toutes les 5s l’espace disque
+watch -n 5 'du -sh /path/*'    # Surveiller taille des sous-répertoires
+
+Analyser répertoires volumineux rapidement
+ncdu /path/to/dir   # Interface ncurses interactive pour explorer l’espace disque
+
+Bonus – éviter saturation future
+# Identifier les fichiers temporaires volumineux
+find /tmp -type f -size +100M
+
+# Vérifier corbeille de l’utilisateur
+du -sh ~/.local/share/Trash
+
+# Rotation des logs (logrotate)
+logrotate -d /etc/logrotate.conf    # Tester configuration
+logrotate -f /etc/logrotate.conf    # Forcer rotation
+
+Processus avancés :
+lsof -i :<port>          # Quel process écoute sur un port
+strace -p <pid>          # Trace system calls d’un processus
+
+Système de fichiers / disque :
+lsattr /path             # Attributs fichiers (immutable, etc.)
+chattr +i fichier        # Rendre fichier immuable
+xfs_quota -x -c "report" /mountpoint  # Quota XFS
+
+Surveillance réseau :
+iftop                   # Surveillance trafic réseau en temps réel
+nload                   # Graphique de trafic réseau
+tcpdump -i eth0         # Capture paquets réseau
+
+
+
+
