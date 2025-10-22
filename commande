@@ -92,6 +92,71 @@ kubectl describe pv <pv>        # Infos PV
 kubectl describe pvc <pvc>      # Infos PVC
 kubectl get sc                  # StorageClass disponibles
 
+Pods
+kubectl get pods --field-selector=status.phase=Failed -A  # Pods échoués
+kubectl get pods --field-selector=status.phase=Running -A # Pods en cours
+kubectl describe pod <pod> -n <ns>      # Détails complet pod
+kubectl logs <pod> -c <container> -n <ns>  # Logs d’un conteneur spécifique
+kubectl logs -f <pod> -n <ns>           # Logs en temps réel
+kubectl logs --previous <pod> -n <ns>   # Logs du conteneur précédent
+kubectl exec -it <pod> -n <ns> -- bash  # Shell interactif dans le pod
+kubectl cp <pod>:/path/to/file /local/path -n <ns>  # Copier fichiers depuis pod
+kubectl cp /local/path <pod>:/path/to/dir -n <ns>  # Copier fichiers vers pod
+
+Services / Networking
+kubectl get svc -A                        # Lister tous les services
+kubectl describe svc <service> -n <ns>   # Détails service
+kubectl port-forward <pod> 8080:80       # Forward port pod vers local
+kubectl get ingress -A                    # Liste ingress pour accès HTTP/HTTPS
+kubectl describe ingress <ingress> -n <ns> # Détails ingress
+kubectl get networkpolicy -A              # Lister NetworkPolicies
+kubectl describe networkpolicy <np> -n <ns> # Détails NetworkPolicy
+
+Deployments / ReplicaSets
+kubectl get deployments -A                # Lister tous les deployments
+kubectl describe deployment <deployment> -n <ns> # Détails deployment
+kubectl rollout status deployment/<deployment> -n <ns>  # Status rollout
+kubectl rollout history deployment/<deployment> -n <ns> # Historique rollout
+kubectl rollout undo deployment/<deployment> -n <ns>    # Rollback deployment
+kubectl scale deployment <deployment> --replicas=5 -n <ns>  # Scale replicas
+
+StatefulSets / DaemonSets
+kubectl get daemonsets -A           # Voir tous les DaemonSets
+kubectl describe daemonset <ds> -n <ns>  # Vérifier sur quels nodes les pods tournent et événements
+kubectl get statefulsets -A         # Lister StatefulSets
+kubectl describe statefulset <sts> -n <ns>  # Détails pods, PVC et ordre de création
+
+ConfigMaps / Secrets
+kubectl get configmap -n <ns>           # Lister ConfigMaps
+kubectl describe configmap <cm> -n <ns> # Détails et clés
+kubectl get secret -n <ns>              # Lister secrets
+kubectl describe secret <secret> -n <ns> # Vérifier type et annotations
+kubectl create secret generic <name> --from-literal=key=value -n <ns>  # Créer secret
+kubectl create configmap <name> --from-file=path/to/file -n <ns>       # Créer configmap
+
+Persistent Volumes / Claims
+kubectl get pv                           # Lister PV
+kubectl get pvc -n <ns>                  # Lister PVC
+kubectl describe pv <pv>                 # Détails PV
+kubectl describe pvc <pvc> -n <ns>       # Détails PVC
+kubectl get storageclass                 # Lister StorageClass
+
+Debug & Monitoring
+kubectl get events -A --sort-by='.metadata.creationTimestamp'  # Evénements récents
+kubectl describe node <node>           # Détails nœud : pods, ressources, taints
+kubectl top nodes                       # CPU/RAM nodes
+kubectl top pods -n <ns>                # CPU/RAM pods
+kubectl describe pod <pod> -n <ns>      # Infos ressources et events
+kubectl logs -f <pod>                   # Logs en continu
+watch kubectl get pods -A               # Rafraîchir pods en temps réel
+kubectl auth can-i <action> --as <user> -n <ns>  # Vérifier droits RBAC
+
+Admission / RBAC
+kubectl get rolebinding -n <ns>               # Lister RoleBindings
+kubectl get clusterrolebinding                # Lister ClusterRoleBindings
+kubectl describe role <role> -n <ns>         # Détails d’un role
+kubectl describe clusterrole <clusterrole>   # Détails d’un clusterrole
+kubectl auth can-i <action> --as <user> -n <ns>  # Vérifier droits d’un utilisateur
 
 Kubernetes – Helm / Diagnostics avancés
 Vérifier les releases Helm
